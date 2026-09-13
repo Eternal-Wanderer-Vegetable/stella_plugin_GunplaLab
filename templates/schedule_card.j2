@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=640">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { background: #f5f6f8; }
+  body { width: 640px; font-family: "Microsoft YaHei", "PingFang SC", sans-serif; background: #f5f6f8; }
+  .card { background: #fff; border-radius: 14px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,.08); }
+  .head { background: linear-gradient(135deg, #1f3a5f, #2c5f8a); color: #fff; padding: 14px 20px; }
+  .head .brand { font-size: 13px; opacity: .82; letter-spacing: 1px; }
+  .head .title { font-size: 19px; font-weight: 700; margin-top: 4px; }
+  .body { padding: 12px 20px; }
+  .row { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid #f0f2f4; }
+  .row:last-child { border-bottom: none; }
+  .badge { flex: 0 0 64px; text-align: center; font-size: 12.5px; border-radius: 6px; padding: 3px 0;
+           background: #eef3f9; color: #2c5f8a; }
+  .badge.reissue { background: #fff2e3; color: #a06b00; }
+  .badge.estimated { background: #f0f1f3; color: #6a7480; }
+  .title { flex: 1; font-size: 14.5px; color: #2a3542; line-height: 1.4; }
+  .meta { flex: 0 0 auto; text-align: right; font-size: 13px; color: #6a7480; }
+  .meta .price { color: #c0392b; font-weight: 700; }
+  .empty { padding: 24px 0; text-align: center; color: #98a1ab; font-size: 14px; }
+  .foot { border-top: 1px solid #eef0f2; padding: 10px 20px; font-size: 12px; color: #98a1ab;
+          display: flex; justify-content: space-between; }
+</style>
+</head>
+<body>
+  <div class="card">
+    <div class="head">
+      <div class="brand">🧪 胶情局 · 发售排期</div>
+      <div class="title">{{ month }} 官方排期{% if total %}（共 {{ total }} 条）{% endif %}</div>
+    </div>
+    <div class="body">
+      {% if not rows %}<div class="empty">该月份暂无官方排期记录</div>{% endif %}
+      {% for r in rows %}
+      <div class="row">
+        <div class="badge {{ r.badge }}">{{ r.label }}</div>
+        <div class="title">{{ r.title }}</div>
+        <div class="meta">
+          {% if r.price %}<div class="price">{{ r.price }}</div>{% endif %}
+          {% if r.date %}<div>{{ r.date }}</div>{% endif %}
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    <div class="foot">
+      <span>数据更新于 {{ updated_at or "—" }}</span>
+      <span>GunplaLab 开放数据</span>
+    </div>
+  </div>
+</body>
+</html>

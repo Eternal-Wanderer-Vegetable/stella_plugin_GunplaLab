@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=640">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { background: #f5f6f8; }
+  body { width: 640px; font-family: "Microsoft YaHei", "PingFang SC", sans-serif; background: #f5f6f8; }
+  .card { background: #fff; border-radius: 14px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,.08); }
+  .head { background: linear-gradient(135deg, #1f3a5f, #2c5f8a); color: #fff; padding: 14px 20px; }
+  .head .brand { font-size: 13px; opacity: .82; letter-spacing: 1px; }
+  .head .title { font-size: 19px; font-weight: 700; margin-top: 4px; line-height: 1.35; }
+  .body { padding: 16px 20px; font-size: 14px; color: #333; }
+  .grid { display: flex; gap: 12px; margin-bottom: 12px; }
+  .cell { flex: 1; background: #f7f9fb; border-radius: 10px; padding: 10px 14px; }
+  .cell .k { font-size: 12px; color: #8a93a0; margin-bottom: 2px; }
+  .cell .v { font-size: 16px; font-weight: 700; color: #22303f; }
+  .verdict { border-radius: 10px; padding: 10px 14px; font-size: 15px; font-weight: 700; }
+  .verdict.good { background: #e8f7ee; color: #1e7e45; border: 1px solid #bfe6cd; }
+  .verdict.ok   { background: #fff6e5; color: #a06b00; border: 1px solid #f0dca8; }
+  .verdict.warn { background: #fdeceb; color: #b03a30; border: 1px solid #f3c1bd; }
+  .verdict.na   { background: #f0f1f3; color: #6a7480; border: 1px solid #dfe3e8; }
+  .spark { margin-top: 14px; }
+  .spark svg { width: 100%; height: auto; }
+  .spark .line { fill: none; stroke: #2c5f8a; stroke-width: 2.5; }
+  .spark .dot { fill: #2c5f8a; }
+  .spark text { font-size: 12px; fill: #6a7480; font-family: "Microsoft YaHei", sans-serif; }
+  .spark .lab-lo { fill: #1e7e45; font-weight: 700; }
+  .spark .lab-hi { fill: #b03a30; font-weight: 700; }
+  .note { margin-top: 10px; font-size: 13px; color: #667; line-height: 1.7; }
+  .foot { border-top: 1px solid #eef0f2; padding: 10px 20px; font-size: 12px; color: #98a1ab;
+          display: flex; justify-content: space-between; }
+</style>
+</head>
+<body>
+  <div class="card">
+    <div class="head">
+      <div class="brand">🧪 胶情局 · 行情判断</div>
+      <div class="title">{{ display_name }}</div>
+    </div>
+    <div class="body">
+      <div class="grid">
+        <div class="cell"><div class="k">官方定价</div><div class="v">{{ official_line }}</div></div>
+        <div class="cell"><div class="k">四算 / 五算线</div><div class="v">{{ golden_lines }}</div></div>
+        <div class="cell"><div class="k">现货价（{{ spot_source }}）</div><div class="v">{{ spot_line }}</div></div>
+      </div>
+      <div class="verdict {{ tone }}">{{ verdict }}</div>
+      {% if sparkline %}
+      <div class="spark">{{ sparkline | safe }}</div>
+      {% endif %}
+      {% if note %}<div class="note">{{ note }}</div>{% endif %}
+    </div>
+    <div class="foot">
+      <span>行情 {{ spot_time or "—" }}｜底账 {{ data_as_of }}</span>
+      <span>GunplaLab 开放数据</span>
+    </div>
+  </div>
+</body>
+</html>

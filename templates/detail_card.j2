@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=640">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { background: #f5f6f8; }
+  body { width: 640px; font-family: "Microsoft YaHei", "PingFang SC", sans-serif; background: #f5f6f8; }
+  .card { background: #ffffff; border-radius: 14px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,.08); }
+  .head { background: linear-gradient(135deg, #1f3a5f, #2c5f8a); color: #fff; padding: 14px 20px; }
+  .head .brand { font-size: 13px; opacity: .82; letter-spacing: 1px; }
+  .head .title { font-size: 19px; font-weight: 700; margin-top: 4px; line-height: 1.35; }
+  .body { padding: 16px 20px; display: flex; gap: 16px; }
+  .cover { flex: 0 0 190px; }
+  .cover img { width: 190px; height: 190px; object-fit: cover; border-radius: 10px; background: #eceff3; }
+  .cover .ph { width: 190px; height: 190px; border-radius: 10px; background: #eceff3; color: #9aa4b0;
+               display: flex; align-items: center; justify-content: center; font-size: 13px; }
+  .info { flex: 1; font-size: 14px; color: #333; line-height: 1.75; }
+  .info .row b { color: #666; font-weight: 600; margin-right: 4px; }
+  .tags { margin-bottom: 6px; }
+  .tag { display: inline-block; background: #eef3f9; color: #2c5f8a; border-radius: 6px;
+         padding: 1px 8px; font-size: 12.5px; margin: 0 6px 4px 0; }
+  .price { color: #c0392b; font-weight: 700; }
+  .foot { border-top: 1px solid #eef0f2; padding: 10px 20px; font-size: 12px; color: #98a1ab;
+          display: flex; justify-content: space-between; }
+</style>
+</head>
+<body>
+  <div class="card">
+    <div class="head">
+      <div class="brand">🧪 胶情局 · 模型档案</div>
+      <div class="title">{{ display_name }}</div>
+    </div>
+    <div class="body">
+      <div class="cover">
+        {% if cover_uri %}<img src="{{ cover_uri }}" alt="cover">
+        {% else %}<div class="ph">暂无封面图</div>{% endif %}
+      </div>
+      <div class="info">
+        <div class="tags">
+          {% for t in tags %}<span class="tag">{{ t }}</span>{% endfor %}
+        </div>
+        {% if work %}<div class="row"><b>作品</b>{{ work }}</div>{% endif %}
+        <div class="row"><b>官方</b><span class="price">{{ official_line }}</span></div>
+        {% if dates %}<div class="row"><b>档期</b>{{ dates }}</div>{% endif %}
+        {% if spot_line %}<div class="row"><b>现货</b>{{ spot_line }}</div>{% endif %}
+        {% if rating_line %}<div class="row"><b>评分</b>{{ rating_line }}</div>{% endif %}
+        {% if jan %}<div class="row"><b>JAN</b>{{ jan }}</div>{% endif %}
+      </div>
+    </div>
+    <div class="foot">
+      <span>数据截至：底账 {{ data_as_of }}</span>
+      {% if detail_url %}<span>{{ detail_url }}</span>{% else %}<span>GunplaLab 开放数据</span>{% endif %}
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,24 @@
+name: gunplalab
+desc: 胶情局开放数据：模型资料查询、现货行情与四算/五算比价（数据来自 GunplaLab 开放数据 API）
+version: v0.1.0
+author: Eternal-Wanderer-Vegetable
+repo: https://github.com/Eternal-Wanderer-Vegetable/stella_plugin_GunplaLab
+# 出网披露（Stella 插件接入规范 §11）：只发送查询关键词与模型编号，绝不上传群聊原文、用户 ID、消息 ID
+stella:
+  egress:
+    - host: 127.0.0.1
+      purpose: 访问本机 GunplaLab 开放数据 API，只发送用户输入的模型关键词与模型编号（部署后请按实际服务地址补充域名）
+    - host: bbs-attachment-cdn.78dm.net
+      purpose: 仅下载模型封面图片，不上传任何数据
+    - host: rfx.hpoi.net
+      purpose: 仅下载模型封面图片，不上传任何数据
+    - host: image.jiao6quan.cn
+      purpose: 仅下载模型封面图片，不上传任何数据
+    - host: staticcdn.bandaihobbysite.cn
+      purpose: 仅下载模型封面图片，不上传任何数据
+    - host: tamashiiweb.com
+      purpose: 仅下载模型封面图片，不上传任何数据
+    - host: a.zdmimg.com
+      purpose: 仅下载模型封面图片，不上传任何数据
+    - host: gd-hbimg.huaban.com
+      purpose: 仅下载模型封面图片，不上传任何数据

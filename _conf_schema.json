@@ -1,0 +1,94 @@
+{
+  "base_url": {
+    "description": "GunplaLab 开放数据 API 根路径",
+    "type": "string",
+    "default": "http://127.0.0.1:3000/api/v1/data",
+    "hint": "未上线阶段填写本机/局域网地址，例如 http://192.168.1.10:3000/api/v1/data；上线后替换为公网地址"
+  },
+  "api_key": {
+    "description": "Bearer Token（可选）",
+    "type": "string",
+    "default": "",
+    "hint": "由胶情局配发，可扩容限流至 300 次/分钟；匿名访问仅 30 次/分钟"
+  },
+  "sync_hour": {
+    "description": "每日快照同步时刻（小时，24 小时制，自动附加 30 分钟内随机抖动）",
+    "type": "int",
+    "default": 4
+  },
+  "use_snapshot": {
+    "description": "启用全量快照常驻内存（模式 A，强烈推荐）",
+    "type": "bool",
+    "default": true,
+    "hint": "关闭后每次查询都远程请求，受 30 次/分钟匿名限流约束"
+  },
+  "max_search_results": {
+    "description": "单次搜索/消歧最多展示条数",
+    "type": "int",
+    "default": 5,
+    "hint": "1-10"
+  },
+  "group_cooldown_seconds": {
+    "description": "指令群级冷却秒数（防刷屏）",
+    "type": "int",
+    "default": 10,
+    "hint": "冷却期内的重复指令会被静默忽略；设为 0 关闭"
+  },
+  "use_system_proxy": {
+    "description": "走系统代理访问数据 API（默认关闭）",
+    "type": "bool",
+    "default": false,
+    "hint": "仅当数据 API 是公网地址且宿主机必须经代理出网时开启；本机/局域网部署请保持关闭，否则回环请求会被代理拦截"
+  },
+  "card_enabled": {
+    "description": "启用图片卡片（资料卡/行情卡/排期卡）",
+    "type": "bool",
+    "default": true,
+    "hint": "渲染不可用时自动回退纯文本，不影响可用性"
+  },
+  "cover_cache_days": {
+    "description": "封面图磁盘缓存天数",
+    "type": "int",
+    "default": 7
+  },
+  "watch_enabled": {
+    "description": "启用群级盯盘订阅轮询",
+    "type": "bool",
+    "default": false,
+    "hint": "开启后 /胶订 创建的订阅才会在后台轮询检查"
+  },
+  "watch_interval_minutes": {
+    "description": "盯盘轮询间隔（分钟，自动附加抖动）",
+    "type": "int",
+    "default": 60,
+    "hint": "每轮每个被盯条目消耗 1 次远程请求，注意与限流配额匹配"
+  },
+  "digest_enabled": {
+    "description": "启用今日胶情定时推送",
+    "type": "bool",
+    "default": false,
+    "hint": "推送到 digest_groups 配置的群；当天无内容时不推送"
+  },
+  "digest_push_time": {
+    "description": "今日胶情推送时刻（HH:MM，附加 5 分钟内抖动）",
+    "type": "string",
+    "default": "09:00"
+  },
+  "digest_groups": {
+    "description": "推送目标群列表",
+    "type": "list",
+    "default": [],
+    "hint": "每项为群号（如 12345）或完整会话串（如 aiocqhttp:GroupMessage:12345）"
+  },
+  "digest_platform": {
+    "description": "digest_groups 填裸群号时使用的平台前缀",
+    "type": "string",
+    "default": "aiocqhttp"
+  },
+  "website_url": {
+    "description": "胶情局网站地址（作为唯一入口链接出现在回复中）",
+    "type": "string",
+    "default": "",
+    "hint": "留空则不展示网站入口"
+  }
+}

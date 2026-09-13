@@ -1,0 +1,81 @@
+# 胶情局能力声明（Stella 插件接入规范 §5）
+# 能力域统一使用自定义 domain = "gunpla"，与 information 等公共域天然隔离。
+# 兼容层的工具 schema 把 Args 段所有参数记为必填（不支持 optional 标记），
+# 因此凡带参数的工具一律不声明 keywords（§⑪），例句路径负责语义触发。
+# 已通过 plugin-scaffold --measure 实测（同域间距达标、负样本余量为正），保持 reviewed = true。
+
+reviewed = true
+
+[[capability]]
+id = "gunpla.info"
+domain = "gunpla"
+description = "查询胶情局收录的模型资料：名称、级别比例、版本、官方定价、发售时间、评分"
+examples = [
+  "RG海牛是什么",
+  "帮我查一下卡牛的资料",
+  "这个型号是哪年发售的",
+  "HG新安洲什么比例",
+  "查查MG卡沙的官方价",
+]
+providers = ["search_gunpla"]
+
+[[capability]]
+id = "gunpla.price"
+domain = "gunpla"
+description = "查询模型现货行情，并结合四算/五算黄金线判断现在入手贵不贵"
+examples = [
+  "海牛现在多少钱",
+  "卡牛贵不贵",
+  "现在入手RG沙划算吗",
+  "这胶溢价了吗，帮我查查行情",
+]
+providers = ["check_gunpla_price"]
+
+[[capability]]
+id = "gunpla.price_history"
+domain = "gunpla"
+description = "查询模型近一段时间的现货行情走势：最低价、最高价、涨跌"
+examples = [
+  "海牛最近降价了吗",
+  "卡牛价格走势怎么样",
+  "RG沙半年内最低多少",
+  "这胶最近涨了还是跌了",
+]
+providers = ["get_gunpla_history"]
+
+[[capability]]
+id = "gunpla.recommend"
+domain = "gunpla"
+description = "按预算推荐值得买的模型，可按品类、级别、用途过滤，结果不足会说明限制"
+examples = [
+  "500块有什么值得买的",
+  "预算300推荐个胶",
+  "送人买什么高达好",
+  "新手第一款买什么模型",
+]
+providers = ["recommend_gunpla"]
+
+[[capability]]
+id = "gunpla.release_schedule"
+domain = "gunpla"
+description = "查询万代官方发售与再版排期日历，可按月份查询"
+examples = [
+  "最近有什么新品发售",
+  "万代下个月出什么",
+  "有再版计划吗",
+  "本月发售表有哪些",
+]
+providers = ["get_release_schedule"]
+
+[[capability]]
+id = "gunpla.intel"
+domain = "gunpla"
+description = "查询万代/魂商店最新官方情报公告：新品、再版、出荷等"
+examples = [
+  "万代最近有什么新情报",
+  "胶圈最近有什么新闻",
+  "魂商店有什么新公告",
+  "最近模型圈有什么消息",
+]
+providers = ["get_gunpla_intel"]
+
