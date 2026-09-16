@@ -85,6 +85,22 @@ def parse_budget(text: str) -> float | None:
     return value if 1 <= value <= 100000 else None
 
 
+_PRICE_TOKEN_RE = re.compile(r"^[¥￥]?(\d+(?:\.\d+)?)(?:块|元|大洋)?$")
+
+
+def parse_price_token(text: str) -> float | None:
+    """严格识别独立的价格 token：「50」「500块」「¥500.5」→ 数值。
+
+    与 parse_budget 的区别：不在 token 内部抠数字——含数字的型号名
+    （RG32、HGAC#223、30MM）不算价格。用于 /胶订 等名称与价格混排的指令。
+    """
+    match = _PRICE_TOKEN_RE.match((text or "").strip())
+    if match is None:
+        return None
+    value = float(match.group(1))
+    return value if 1 <= value <= 100000 else None
+
+
 def normalize_category(text: str) -> str:
     return CATEGORY_ALIASES.get(normalize(text), "")
 

@@ -164,6 +164,32 @@ class TestFormatting:
         text = svc.format_candidates("高达", outcome.items)
         assert text.startswith("「高达」匹配到")
         assert "1." in text and "120 秒内有效" in text
+        # /胶订 等其他指令的候选提示应指向各自的序号选择入口
+        watch_text = svc.format_candidates("高达", outcome.items, command="胶订")
+        assert "胶订 序号" in watch_text
+
+
+class TestCandidateSession:
+    def test_pick_flow_single_use(self, tmp_path):
+        svc = make_service(tmp_path)
+        items = [{"id": "a"}, {"id": "b"}, {"id": "c"}]
+        svc.save_candidates("s1", items)
+        assert svc.pick_candidate("s1", 2) == {"id": "b"}
+        assert svc.pick_candidate("s1", 2) is None  # 会话单次有效
+
+    def test_pick_out_of_range(self, tmp_path):
+        svc = make_service(tmp_path)
+        svc.save_candidates("s1", [{"id": "a"}])
+        assert svc.pick_candidate("s1", 5) is None
+
+    def test_pick_expired(self, tmp_path):
+        import time as _time
+        svc = make_service(tmp_path)
+        svc.save_candidates("s1", [{"id": "a"}])
+        saved_at, items = svc._sessions["s1"]
+        svc._sessions["s1"] = (saved_at - 999.0, items)
+        assert svc.pick_candidate("s1", 1) is None
+        assert "s1" not in svc._sessions  # 过期会话被清理
 
 
 class TestToolSummary:

@@ -12,6 +12,7 @@ from typing import Any, Callable, Awaitable
 
 from .advisor import availability_label, format_cny, format_jpy
 from .api_client import GunplaApiError, GunplaLabClient
+from . import recommender
 from .snapshot import SnapshotStore, normalize
 
 logger = logging.getLogger("gunplalab.watch")
@@ -244,6 +245,33 @@ async def poll_once(
         watch_store.save()
 
     return stats
+
+
+# ----------------------------------------------------------------------
+# 指令解析
+# ----------------------------------------------------------------------
+
+def parse_watch_args(tokens: list[str]) -> tuple[str, float | None, bool, bool]:
+    """从 /胶订 添加 的指令尾部分离关键词与条件（目标价 / 再版 / 补货）。
+
+    目标价只认严格的价格 token（recommender.parse_price_token）：
+    型号名里的数字（RG32、HGAC#223、30MM）不会被误当成目标价。
+    """
+    keyword_tokens: list[str] = []
+    target: float | None = None
+    watch_reissue = watch_restock = False
+    for token in tokens:
+        if token == "再版":
+            watch_reissue = True
+        elif token in ("补货", "现货"):
+            watch_restock = True
+        else:
+            value = recommender.parse_price_token(token)
+            if value is not None and target is None:
+                target = value
+            else:
+                keyword_tokens.append(token)
+    return " ".join(keyword_tokens), target, watch_reissue, watch_restock
 
 
 # ----------------------------------------------------------------------

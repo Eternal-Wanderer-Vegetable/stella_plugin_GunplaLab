@@ -227,8 +227,8 @@ class GunplaService:
             lines.append(f"完整档案：{self.website_url}")
         return "\n".join(lines)
 
-    def format_candidates(self, keyword: str, items: list[dict]) -> str:
-        head = f"「{keyword}」匹配到 {len(items)} 款，请回复“胶查 序号”选择（{int(SESSION_TTL_SECONDS)} 秒内有效）："
+    def format_candidates(self, keyword: str, items: list[dict], *, command: str = "胶查") -> str:
+        head = f"「{keyword}」匹配到 {len(items)} 款，请回复“{command} 序号”选择（{int(SESSION_TTL_SECONDS)} 秒内有效）："
         rows = []
         for idx, item in enumerate(items, 1):
             rows.append(

@@ -32,6 +32,22 @@ class TestParsers:
         assert recommender.parse_budget("abc") is None
         assert recommender.parse_budget("") is None
 
+    def test_parse_price_token_strict(self):
+        # 独立价格 token 正常识别
+        assert recommender.parse_price_token("50") == 50.0
+        assert recommender.parse_price_token("500块") == 500.0
+        assert recommender.parse_price_token("￥220元") == 220.0
+        assert recommender.parse_price_token("¥1500.5") == 1500.5
+        # 含数字的型号名不算价格（回归：HGAC#223 曾被抠成 223 当目标价）
+        assert recommender.parse_price_token("RG32") is None
+        assert recommender.parse_price_token("HGAC#223") is None
+        assert recommender.parse_price_token("HGUC#21") is None
+        assert recommender.parse_price_token("30MM") is None
+        assert recommender.parse_price_token("2号机") is None
+        assert recommender.parse_price_token("abc") is None
+        assert recommender.parse_price_token("") is None
+        assert recommender.parse_price_token("0") is None
+
     def test_normalize_category(self):
         assert recommender.normalize_category("假面骑士") == "rider"
         assert recommender.normalize_category("高达") == "gunpla"

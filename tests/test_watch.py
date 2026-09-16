@@ -48,6 +48,23 @@ class TestStore:
         assert store2.remove("g1", 1) is None
 
 
+class TestParseArgs:
+    def test_numbered_id_with_target(self):
+        # 回归：型号名里的数字曾被 parse_budget 抠成目标价（HGAC#223→223），真价格反成关键词
+        assert watch.parse_watch_args(["HGAC#223", "50", "再版"]) == ("HGAC#223", 50.0, True, False)
+        assert watch.parse_watch_args(["RG32", "200"]) == ("RG32", 200.0, False, False)
+        assert watch.parse_watch_args(["30MM", "500块"]) == ("30MM", 500.0, False, False)
+
+    def test_conditions_and_order(self):
+        assert watch.parse_watch_args(["海牛", "220", "再版"]) == ("海牛", 220.0, True, False)
+        assert watch.parse_watch_args(["220", "海牛"]) == ("海牛", 220.0, False, False)
+        assert watch.parse_watch_args(["独角兽", "1500"]) == ("独角兽", 1500.0, False, False)
+        assert watch.parse_watch_args(["独角兽", "补货", "现货"]) == ("独角兽", None, False, True)
+        assert watch.parse_watch_args(["MGSD"]) == ("MGSD", None, False, False)
+        # 只给价格没给名称 → 关键词为空，由调用方拒绝
+        assert watch.parse_watch_args(["50"]) == ("", 50.0, False, False)
+
+
 class TestEvaluate:
     def test_first_round_records_baseline_no_alert(self, tmp_path):
         sub = make_sub(watch_restock=True, watch_reissue=True)

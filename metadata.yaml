@@ -1,6 +1,6 @@
 name: gunplalab
 desc: 胶情局开放数据：模型资料查询、现货行情与四算/五算比价（数据来自 GunplaLab 开放数据 API）
-version: v0.1.0
+version: v0.2.0
 author: Eternal-Wanderer-Vegetable
 repo: https://github.com/Eternal-Wanderer-Vegetable/stella_plugin_GunplaLab
 # 出网披露（Stella 插件接入规范 §11）：只发送查询关键词与模型编号，绝不上传群聊原文、用户 ID、消息 ID

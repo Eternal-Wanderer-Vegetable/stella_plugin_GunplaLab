@@ -68,6 +68,8 @@ class GunplaLabPlugin(Star):
         self._covers: render.CoverCache | None = None
         self._watch_store: watch.WatchStore | None = None
         self._pending_watch: dict[str, tuple[watch.WatchItem, float]] = {}
+        # 多候选暂存：候选挑选期间记住用户的盯盘条件（目标价/再版/补货）
+        self._pending_watch_add: dict[str, tuple[float | None, bool, bool]] = {}
         self._last_call: dict[tuple[str, str], float] = {}
 
     # ------------------------------------------------------------------
@@ -409,6 +411,11 @@ class GunplaLabPlugin(Star):
             return
         action, rest = tokens[0], tokens[1:]
 
+        if action.isdigit():
+            async for r in self._watch_pick(event, session, sender_scope, int(action)):
+                yield r
+            return
+
         if action in ("列表", "list"):
             yield event.plain_result(watch.format_list(self._watch_store.list_group(session)))
             return
@@ -419,6 +426,7 @@ class GunplaLabPlugin(Star):
             return
 
         if action == "确认":
+            self._pending_watch_add.pop(sender_scope, None)
             pending = self._pending_watch.pop(sender_scope, None)
             if not pending or time.monotonic() > pending[1]:
                 yield event.plain_result("当前没有待确认的订阅（可能已超时），请重新创建")
@@ -431,6 +439,7 @@ class GunplaLabPlugin(Star):
 
         if action == "取消":
             pending = self._pending_watch.pop(sender_scope, None)
+            self._pending_watch_add.pop(sender_scope, None)
             yield event.plain_result(
                 "已取消。" if pending else "当前没有待确认的订阅。"
             )
@@ -468,7 +477,7 @@ class GunplaLabPlugin(Star):
 
     async def _watch_add(self, event: AstrMessageEvent, session: str, sender_scope: str,
                          rest: list[str]) -> AsyncGenerator:
-        keyword, target, reissue, restock = _parse_watch_conditions(rest)
+        keyword, target, reissue, restock = watch.parse_watch_args(rest)
         if not keyword or (target is None and not reissue and not restock):
             yield event.plain_result(
                 "用法：/胶订 添加 <名称> <目标价|再版|补货>\n例如：/胶订 添加 海牛 220 再版、/胶订 添加 独角兽 1500"
@@ -481,11 +490,40 @@ class GunplaLabPlugin(Star):
             yield event.plain_result(self._miss_text(keyword))
             return
         if len(outcome.items) > 1:
+            # 记住盯盘条件，等用户回复「胶订 序号」选中后继续
+            self._pending_watch_add[sender_scope] = (target, reissue, restock)
             yield event.plain_result(
-                self._service.format_candidates(outcome.keyword or keyword, outcome.items)
+                self._service.format_candidates(
+                    outcome.keyword or keyword, outcome.items, command="胶订"
+                )
             )
             return
-        item = outcome.items[0]
+        async for r in self._watch_prompt_confirm(
+            event, session, sender_scope, outcome.items[0], target, reissue, restock
+        ):
+            yield r
+
+    async def _watch_pick(self, event: AstrMessageEvent, session: str, sender_scope: str,
+                          number: int) -> AsyncGenerator:
+        """多候选时的序号选择：继续被候选列表打断的添加流程（会话延续，不受冷却限制）。"""
+        conds = self._pending_watch_add.pop(sender_scope, None)
+        if conds is None:
+            yield event.plain_result(
+                "当前没有待选择的盯盘候选，请先 /胶订 添加 <名称> <目标价|再版|补货>"
+            )
+            return
+        picked = self._service.pick_candidate(sender_scope, number)
+        if picked is None:
+            yield event.plain_result("候选已过期或序号无效（120 秒内有效），请重新 /胶订 添加")
+            return
+        target, reissue, restock = conds
+        async for r in self._watch_prompt_confirm(event, session, sender_scope, picked, target, reissue, restock):
+            yield r
+
+    async def _watch_prompt_confirm(self, event: AstrMessageEvent, session: str, sender_scope: str,
+                                    item: dict, target: float | None, reissue: bool,
+                                    restock: bool) -> AsyncGenerator:
+        """复述确认：唯一命中与序号选中后共用（Notion 要求：防止盯错版本）。"""
         item_id = str(item.get("id") or "")
         if len(self._watch_store.list_group(session)) >= watch.MAX_PER_GROUP:
             yield event.plain_result(f"每群最多 {watch.MAX_PER_GROUP} 条订阅，请先 /胶订 移除")
@@ -504,7 +542,6 @@ class GunplaLabPlugin(Star):
             target_price=target, watch_reissue=reissue, watch_restock=restock,
             created_at=_dt.datetime.now().astimezone().replace(microsecond=0).isoformat(),
         )
-        # 复述确认（Notion 要求：防止盯错版本）
         self._pending_watch[sender_scope] = (sub, time.monotonic() + 120.0)
         current = ""
         detail = await self._service.item_detail(item_id)
@@ -889,25 +926,6 @@ _WATCH_USAGE = (
     "· 雷达 <关键词>：标题命中的新情报推送\n"
     "· 列表｜移除 <序号>｜确认｜取消"
 )
-
-
-def _parse_watch_conditions(tokens: list[str]) -> tuple[str, float | None, bool, bool]:
-    """从指令尾部分离关键词与条件（目标价 / 再版 / 补货）。"""
-    keyword_tokens: list[str] = []
-    target: float | None = None
-    watch_reissue = watch_restock = False
-    for token in tokens:
-        if token == "再版":
-            watch_reissue = True
-        elif token in ("补货", "现货"):
-            watch_restock = True
-        else:
-            value = recommender.parse_budget(token)
-            if value is not None and target is None:
-                target = value
-            else:
-                keyword_tokens.append(token)
-    return " ".join(keyword_tokens), target, watch_reissue, watch_restock
 
 
 def _alt_label(item: dict) -> str:
